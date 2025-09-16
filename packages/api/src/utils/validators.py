@@ -15,7 +15,7 @@ def is_valid_cpf(cpf_string: str) -> bool:
 def is_strong_password(password: str) -> (bool, str):
     """
     Verifica a força de uma senha.
-    Regras: Mínimo 8 caracteres, 1 minúscula, 1 maiúscula, 1 número.
+    Regras: Mínimo 8 caracteres, 1 minúscula, 1 maiúscula, 1 número, 1 caractere especial.
     Retorna uma tupla (True/False, "mensagem").
     """
     if not password:
@@ -32,5 +32,8 @@ def is_strong_password(password: str) -> (bool, str):
 
     if not re.search(r"[0-9]", password):
         return (False, "A senha deve conter pelo menos um número.")
+
+    if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?~`]", password):
+        return (False, "A senha deve conter pelo menos um caractere especial (!@#$%^&*()_+-=[]{}|;':\",./<>?~`).")
 
     return (True, "Senha válida.")

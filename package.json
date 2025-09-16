@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "start:api": "cd packages/api && .\\.venv\\Scripts\\activate.bat && python run.py",
-    "start:web": "npm run dev --workspace=web",
+    "start:web": "live-server packages/web",
     "start:mobile": "npm run start --workspace=mobile"
   },
   "keywords": [],

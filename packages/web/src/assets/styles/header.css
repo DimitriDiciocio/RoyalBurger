@@ -104,9 +104,48 @@ header {
       align-items: center;
       gap: 20px;
 
+      & .cesta{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--color-primary);
+        border-radius: 15px;
+        padding: 10px 25px;
+        cursor: pointer;
+        user-select: none;
+
+        & i{
+          font-size: 14px;
+          color: var(--color-texto-black);
+          margin-right: 10px;
+        }
+
+        & .total{
+          font-size: 8px;
+          font-weight: bolder;
+          color: var(--color-texto-light);
+        }
+
+        & .valor{
+          display: flex;
+          align-items: center;
+
+          & #preco{
+            font-size: 8px;
+          }
+
+          & #itens{
+            font-size: 8px;
+            color: var(--color-texto-erased);
+          }
+        }
+      }
+
       & .pontos-royal{
         display: flex;
         align-items: center;
+        user-select: none;
+        cursor: pointer;
 
         & i{
           color: var(--color-primary);
@@ -123,10 +162,12 @@ header {
       & .endereco{
         display: flex;
         align-items: center;
+        cursor: pointer;
 
         & i{
           color: var(--color-texto-black);
           font-size: 14px;
+          user-select: none;
         }
 
         & p{
@@ -148,11 +189,13 @@ header {
         border-radius: 50px;
         font-weight: bold;
         font-size: 17px;
-        height: 35px;
-        width: 35px;
+        height: 40px;
+        width: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
+        user-select: none;
+        cursor: pointer;
       }
     }
   }

@@ -8,50 +8,66 @@ from ..database import get_db_connection
 from ..utils import token_helper
 from ..utils import validators
 
+
 def create_user(user_data):
     """Cria um novo usuário (cliente ou interno) e envia e-mail de boas-vindas."""
     full_name = user_data.get('full_name')
     email = user_data.get('email')
     password = user_data.get('password')
+    # NOVO: Coleta a data de nascimento
+    date_of_birth = user_data.get('date_of_birth')
 
-    # 2. Adiciona a validação da senha
+    # (A validação de senha continua a mesma)
     is_strong, message = validators.is_strong_password(password)
     if not is_strong:
-        return (None, message)  # Retorna a mensagem de erro específica
-    role = user_data.get('role', 'customer')  # Padrão é 'customer'
+        return (None, message)
 
+    role = user_data.get('role', 'customer')
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
     conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        sql = "INSERT INTO USERS (FULL_NAME, EMAIL, PASSWORD_HASH, ROLE) VALUES (?, ?, ?, ?) RETURNING ID;"
-        cur.execute(sql, (full_name, email, hashed_password.decode('utf-8'), role))
+
+        # NOVO: Adiciona DATE_OF_BIRTH ao SQL
+        sql = """
+            INSERT INTO USERS (FULL_NAME, EMAIL, PASSWORD_HASH, ROLE, DATE_OF_BIRTH) 
+            VALUES (?, ?, ?, ?, ?) 
+            RETURNING ID;
+        """
+        # NOVO: Passa date_of_birth como parâmetro
+        cur.execute(sql, (full_name, email, hashed_password.decode('utf-8'), role, date_of_birth))
         new_user_id = cur.fetchone()[0]
         conn.commit()
 
-        new_user = {"id": new_user_id, "full_name": full_name, "email": email, "role": role}
+        # Adicionamos a data de nascimento ao objeto retornado
+        new_user = {
+            "id": new_user_id,
+            "full_name": full_name,
+            "email": email,
+            "role": role,
+            "date_of_birth": date_of_birth
+        }
 
-        # 2. Se for um cliente, envia o e-mail de boas-vindas
         if role == 'customer':
             try:
                 email_service.send_email(
                     to=new_user['email'],
                     subject='Bem-vindo ao Royal Burger!',
                     template='welcome',
-                    user=new_user  # Passa o objeto do usuário para o template
+                    user=new_user
                 )
             except Exception as e:
-                # O cadastro não deve falhar se o e-mail não puder ser enviado.
-                # Apenas registramos o erro no console.
                 print(f"AVISO: Falha ao enviar e-mail de boas-vindas para {new_user['email']}. Erro: {e}")
 
-        return new_user
+        # Retorna o novo usuário e None para a mensagem de erro
+        return (new_user, None)
     except fdb.Error as e:
         print(f"Erro ao criar usuário: {e}")
         if conn: conn.rollback()
-        return None
+        # Retorna None para o usuário e uma mensagem de erro genérica
+        return (None, "O e-mail fornecido já pode estar em uso.")
     finally:
         if conn: conn.close()
 
@@ -94,29 +110,69 @@ def get_user_by_id(user_id):
 
 
 def update_user(user_id, update_data):
-    """Atualiza dados de um usuário."""
-    allowed_fields = ['full_name', 'date_of_birth', 'phone', 'cpf']
-    set_parts = [f"{key} = ?" for key in update_data if key in allowed_fields]
-    if not set_parts: return False
-
-    values = [value for key, value in update_data.items() if key in allowed_fields]
-    values.append(user_id)
-
+    """
+    Atualiza dados de um usuário com validações específicas para cada campo.
+    Retorna uma tupla: (sucesso, mensagem).
+    """
     conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
-        sql = f"UPDATE USERS SET {', '.join(set_parts)} WHERE ID = ? AND IS_ACTIVE = TRUE;"
-        cur.execute(sql, tuple(values))
+
+        # --- NOVA ETAPA: Verificação de Existência ---
+        # Primeiro, garantimos que o usuário que estamos tentando editar realmente existe.
+        sql_check_exists = "SELECT 1 FROM USERS WHERE ID = ? AND IS_ACTIVE = TRUE;"
+        cur.execute(sql_check_exists, (user_id,))
+        if not cur.fetchone():
+            return (False, "Usuário não encontrado.")
+
+        # --- Validações Específicas (continuam iguais) ---
+        if 'email' in update_data:
+            new_email = update_data['email']
+            sql_check_email = "SELECT ID FROM USERS WHERE EMAIL = ? AND ID <> ?;"
+            cur.execute(sql_check_email, (new_email, user_id))
+            if cur.fetchone():
+                return (False, "Este e-mail já está em uso por outra conta.")
+
+        if 'phone' in update_data:
+            new_phone = update_data['phone']
+            if new_phone:
+                sql_check_phone = "SELECT ID FROM USERS WHERE PHONE = ? AND ID <> ?;"
+                cur.execute(sql_check_phone, (new_phone, user_id))
+                if cur.fetchone():
+                    return (False, "Este telefone já está em uso por outra conta.")
+
+        if 'cpf' in update_data:
+            new_cpf = update_data['cpf']
+            if new_cpf and not validators.is_valid_cpf(new_cpf):
+                return (False, "O CPF fornecido é inválido.")
+
+        # --- Construção da Query de Update (continua igual) ---
+        allowed_fields = ['full_name', 'date_of_birth', 'phone', 'cpf', 'email']
+        fields_to_update = {k: v for k, v in update_data.items() if k in allowed_fields}
+
+        if not fields_to_update:
+            return (False, "Nenhum campo válido para atualização foi fornecido.")
+
+        set_parts = [f"{key} = ?" for key in fields_to_update]
+        values = list(fields_to_update.values())
+        values.append(user_id)
+
+        sql_update = f"UPDATE USERS SET {', '.join(set_parts)} WHERE ID = ?;"
+        cur.execute(sql_update, tuple(values))
         conn.commit()
-        return cur.rowcount > 0
+
+        # --- LÓGICA DE RETORNO CORRIGIDA ---
+        # Se chegamos até aqui sem erros, a operação foi um sucesso.
+        # Não dependemos mais do rowcount.
+        return (True, "Dados atualizados com sucesso.")
+
     except fdb.Error as e:
         print(f"Erro ao atualizar usuário: {e}")
         if conn: conn.rollback()
-        return False
+        return (False, "Ocorreu um erro interno no servidor.")
     finally:
         if conn: conn.close()
-
 
 def deactivate_user(user_id):
     """'Deleta' um usuário (na verdade, apenas o inativa - Soft Delete)."""

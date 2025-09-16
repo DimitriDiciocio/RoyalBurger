@@ -6,504 +6,231 @@ info:
 servers:
   - url: http://127.0.0.1:5000/api
     description: Servidor de Desenvolvimento Local
-
-# ===============================================================
-# Componentes Reutilizáveis
-# ===============================================================
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
   schemas:
-    # --- Schemas Genéricos ---
     MessageResponse:
       type: object
-      properties:
-        msg:
-          type: string
-          example: "Operação realizada com sucesso."
-
-    # --- Schemas para Chat ---
+      properties: {msg: {type: string, example: "Operação realizada com sucesso."}}
     ChatMessage:
       type: object
-      properties:
-        id: {type: integer, example: 101}
-        sender_id: {type: integer, example: 2}
-        sender_name: {type: string, example: "Atendente Ana"}
-        message: {type: string, example: "Olá! Seu pedido já saiu para entrega."}
-        timestamp: {type: string, format: date-time, example: "2025-09-15T18:30:00"}
+      properties: {id: {type: integer, example: 101}, sender_id: {type: integer, example: 2}, sender_name: {type: string, example: "Atendente Ana"}, message: {type: string, example: "Olá! Seu pedido já saiu para entrega."}, timestamp: {type: string, format: date-time, example: "2025-09-15T18:30:00"}}
     NewChatMessage:
       type: object
-      required:
-        - message
-      properties:
-        message: {type: string, example: "Obrigado!"}
-
-    # --- Schemas para Clientes (Customer) ---
+      required: [message]
+      properties: {message: {type: string, example: "Obrigado!"}}
     Customer:
       type: object
-      properties:
-        id: {type: integer, example: 3}
-        full_name: {type: string, example: "João da Silva"}
-        email: {type: string, format: email, example: "joao.silva@email.com"}
-        phone_number: {type: string, example: "14999998888"}
-        role: {type: string, example: "customer"}
-        is_active: {type: boolean, example: true}
+      properties: {id: {type: integer, example: 3}, full_name: {type: string, example: "João da Silva"}, email: {type: string, format: email, example: "joao.silva@email.com"}, phone_number: {type: string, example: "14999998888"}, role: {type: string, example: "customer"}, is_active: {type: boolean, example: true}}
     NewCustomer:
       type: object
-      required:
-        - full_name
-        - email
-        - password
+      required: [full_name, email, password, password_confirmation, date_of_birth]
       properties:
         full_name: {type: string, example: "Maria Oliveira"}
         email: {type: string, format: email, example: "maria.oliveira@email.com"}
         password: {type: string, example: "SenhaForte123"}
+        password_confirmation: {type: string, example: "SenhaForte123"}
         phone_number: {type: string, example: "14988887777"}
-
-    # --- Schemas para Endereços (Address) ---
+        date_of_birth: {type: string, format: date, example: "1995-05-20"}
+    UpdateCustomer:
+      type: object
+      properties:
+        full_name: {type: string, example: "João da Silva Santos"}
+        email: {type: string, format: email, example: "joao.santos@email.com"}
+        phone: {type: string, example: "14999991234"}
+        cpf: {type: string, example: "12345678900"}
+        date_of_birth: {type: string, format: date, example: "1990-07-22"}
     Address:
       type: object
-      properties:
-        id: {type: integer, example: 1}
-        street: {type: string, example: "Rua das Flores"}
-        number: {type: string, example: "123"}
-        complement: {type: string, example: "Apto 4B"}
-        neighborhood: {type: string, example: "Centro"}
-        city: {type: string, example: "Lins"}
-        state: {type: string, example: "SP"}
-        zip_code: {type: string, example: "16400-000"}
+      properties: {id: {type: integer, example: 1}, street: {type: string, example: "Rua das Flores"}, number: {type: string, example: "123"}, complement: {type: string, example: "Apto 4B"}, neighborhood: {type: string, example: "Centro"}, city: {type: string, example: "Lins"}, state: {type: string, example: "SP"}, zip_code: {type: string, example: "16400-000"}}
     NewAddress:
       type: object
-      required:
-        - street
-        - number
-        - neighborhood
-        - city
-      properties:
-        street: {type: string, example: "Avenida Brasil"}
-        number: {type: string, example: "1000"}
-        complement: {type: string}
-        neighborhood: {type: string, example: "Jardim Americano"}
-        city: {type: string, example: "Lins"}
-        state: {type: string, example: "SP"}
-        zip_code: {type: string, example: "16400-123"}
-
-    # --- Schemas para Fidelidade (Loyalty) ---
+      required: [street, number, neighborhood, city]
+      properties: {street: {type: string, example: "Avenida Brasil"}, number: {type: string, example: "1000"}, complement: {type: string}, neighborhood: {type: string, example: "Jardim Americano"}, city: {type: string, example: "Lins"}, state: {type: string, example: "SP"}, zip_code: {type: string, example: "16400-123"}}
     LoyaltyBalance:
       type: object
-      properties:
-        accumulated_points: {type: integer, example: 500}
-        spent_points: {type: integer, example: 100}
-        current_balance: {type: integer, example: 400}
+      properties: {accumulated_points: {type: integer, example: 500}, spent_points: {type: integer, example: 100}, current_balance: {type: integer, example: 400}}
     LoyaltyHistoryEntry:
       type: object
-      properties:
-        points: {type: integer, example: 50}
-        reason: {type: string, example: "Pedido ID: 123"}
-        date: {type: string, format: date-time, example: "2025-09-15T20:30:00"}
-
-    # --- Schemas para Ingredientes ---
+      properties: {points: {type: integer, example: 50}, reason: {type: string, example: "Pedido ID: 123"}, date: {type: string, format: date-time, example: "2025-09-15T20:30:00"}}
     Ingredient:
       type: object
-      properties:
-        id: {type: integer, example: 25}
-        name: {type: string, example: "Queijo Cheddar Fatiado"}
-        price: {type: number, format: float, example: 1.50}
-        is_available: {type: boolean, example: true}
+      properties: {id: {type: integer, example: 25}, name: {type: string, example: "Queijo Cheddar Fatiado"}, price: {type: number, format: float, example: 1.50}, is_available: {type: boolean, example: true}}
     NewIngredient:
       type: object
-      required:
-        - name
-      properties:
-        name: {type: string, example: "Cebola Roxa"}
-        price: {type: number, format: float, example: 0.50}
+      required: [name]
+      properties: {name: {type: string, example: "Cebola Roxa"}, price: {type: number, format: float, example: 0.50}}
     UpdateIngredientAvailability:
       type: object
-      required:
-        - is_available
-      properties:
-        is_available: {type: boolean, example: false}
-
-    # --- Schemas para Notificações ---
+      required: [is_available]
+      properties: {is_available: {type: boolean, example: false}}
     Notification:
       type: object
-      properties:
-        id: {type: integer, example: 5}
-        message: {type: string, example: "Seu pedido #123 foi atualizado para 'A caminho'."}
-        link: {type: string, example: "/my-orders/123"}
-        is_read: {type: boolean, example: false}
-        created_at: {type: string, format: date-time, example: "2025-09-15T21:00:00"}
-
-    # --- Schemas para Pedidos (Order) ---
+      properties: {id: {type: integer, example: 5}, message: {type: string, example: "Seu pedido #123 foi atualizado para 'A caminho'."}, link: {type: string, example: "/my-orders/123"}, is_read: {type: boolean, example: false}, created_at: {type: string, format: date-time, example: "2025-09-15T21:00:00"}}
     OrderItemExtra:
       type: object
-      properties:
-        ingredient_id: {type: integer, example: 10}
-        quantity: {type: integer, example: 2}
+      properties: {ingredient_id: {type: integer, example: 10}, quantity: {type: integer, example: 2}}
     OrderItem:
       type: object
-      required:
-        - product_id
-        - quantity
+      required: [product_id, quantity]
       properties:
         product_id: {type: integer, example: 1}
         quantity: {type: integer, example: 1}
         extras:
           type: array
-          items:
-            $ref: '#/components/schemas/OrderItemExtra'
+          items: {$ref: '#/components/schemas/OrderItemExtra'}
     NewOrder:
       type: object
-      required:
-        - address_id
-        - items
-        - payment_method
+      required: [address_id, items, payment_method]
       properties:
         address_id: {type: integer, example: 1}
         items:
           type: array
-          items:
-            $ref: '#/components/schemas/OrderItem'
+          items: {$ref: '#/components/schemas/OrderItem'}
         payment_method: {type: string, enum: [credit, debit, pix, cash], example: "cash"}
         change_for_amount: {type: number, format: float, example: 50.00, description: "Opcional. Usado apenas se payment_method for 'cash'."}
         notes: {type: string, example: "Por favor, sem cebola."}
         cpf_on_invoice: {type: string, example: "12345678900"}
-        points_to_redeem: {type: integer, example: 100}
+        points_to_redeem:
+          type: integer
+          example: 100
+          description: "Número de pontos que o cliente deseja resgatar. O sistema validará se o saldo (não expirado) é suficiente."
     OrderSummary:
       type: object
       properties:
-        id:
-          type: integer
-          example: 124
-        status:
-          type: string
-          example: "delivered"
-        confirmation_code:
-          type: string
-          example: "A4B9"
-        created_at:
-          type: string
-          format: date-time
-        total_amount:
-          type: number
-          format: float
-          example: 25.80
+        id: {type: integer, example: 124}
+        status: {type: string, example: "delivered"}
+        confirmation_code: {type: string, example: "A4B9"}
+        created_at: {type: string, format: date-time}
+        total_amount: {type: number, format: float, example: 25.80}
     OrderDetailItem:
       type: object
       properties:
-        quantity:
-          type: integer
-          example: 1
-        unit_price:
-          type: number
-          format: float
-          example: 19.90
-        product_name:
-          type: string
-          example: "X-Salada Clássico"
-        product_description:
-          type: string
-          example: "Pão, hambúrguer, queijo..."
+        quantity: {type: integer, example: 1}
+        unit_price: {type: number, format: float, example: 19.90}
+        product_name: {type: string, example: "X-Salada Clássico"}
+        product_description: {type: string, example: "Pão, hambúrguer, queijo..."}
     OrderDetails:
       type: object
       properties:
-        id:
-          type: integer
-          example: 124
-        user_id:
-          type: integer
-          example: 3
-        address_id:
-          type: integer
-          example: 1
-        status:
-          type: string
-          example: "preparing"
-        confirmation_code:
-          type: string
-          example: "A4B9"
-        notes:
-          type: string
-          example: "Sem cebola"
-        payment_method:
-          type: string
-          example: "cash"
-        change_for_amount:
-          type: number
-          format: float
-          example: 50.00
-        cpf_on_invoice:
-          type: string
-          example: "12345678900"
-        discount_amount:
-          type: number
-          format: float
-          example: 5.00
-        created_at:
-          type: string
-          format: date-time
+        id: {type: integer, example: 124}
+        user_id: {type: integer, example: 3}
+        address_id: {type: integer, example: 1}
+        status: {type: string, example: "preparing"}
+        confirmation_code: {type: string, example: "A4B9"}
+        notes: {type: string, example: "Sem cebola"}
+        payment_method: {type: string, example: "cash"}
+        change_for_amount: {type: number, format: float, example: 50.00}
+        cpf_on_invoice: {type: string, example: "12345678900"}
+        discount_amount: {type: number, format: float, example: 5.00}
+        created_at: {type: string, format: date-time}
         items:
           type: array
-          items:
-            $ref: '#/components/schemas/OrderDetailItem'
+          items: {$ref: '#/components/schemas/OrderDetailItem'}
     UpdateOrderStatus:
       type: object
-      required:
-        - status
+      required: [status]
       properties:
-        status:
-          type: string
-          enum: [pending, preparing, on_the_way, delivered, cancelled]
-          example: "preparing"
-# --- Schemas para Produtos ---
+        status: {type: string, enum: [pending, preparing, on_the_way, delivered, cancelled], example: "preparing"}
     Product:
       type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        name:
-          type: string
-          example: "X-Salada Clássico"
-        description:
-          type: string
-          example: "Um clássico pão, hambúrguer de 150g, queijo mussarela, alface e tomate frescos."
-        price:
-          type: number
-          format: float
-          example: 19.90
-        image_url:
-          type: string
-          example: "https://seusite.com/imagens/x-salada.png"
-        section_id:
-          type: integer
-          example: 2
-        is_active:
-          type: boolean
-          example: true
-
+      properties: {id: {type: integer, example: 1}, name: {type: string, example: "X-Salada Clássico"}, description: {type: string, example: "Um clássico pão, hambúrguer de 150g, queijo mussarela, alface e tomate frescos."}, price: {type: number, format: float, example: 19.90}, image_url: {type: string, example: "https://seusite.com/imagens/x-salada.png"}, section_id: {type: integer, example: 2}, is_active: {type: boolean, example: true}}
     NewProduct:
       type: object
-      required:
-        - name
-        - price
-        - section_id
-      properties:
-        name:
-          type: string
-          example: "Batata Frita Especial"
-        description:
-          type: string
-          example: "Porção de 300g de batatas fritas crocantes com cheddar e bacon."
-        price:
-          type: number
-          format: float
-          example: 15.00
-        image_url:
-          type: string
-          example: "https://seusite.com/imagens/batata-frita.png"
-        section_id:
-          type: integer
-          example: 3
-# --- Schemas para Associação de Produtos e Ingredientes ---
+      required: [name, price, section_id]
+      properties: {name: {type: string, example: "Batata Frita Especial"}, description: {type: string, example: "Porção de 300g de batatas fritas crocantes com cheddar e bacon."}, price: {type: number, format: float, example: 15.00}, image_url: {type: string, example: "https://seusite.com/imagens/batata-frita.png"}, section_id: {type: integer, example: 3}}
     ProductIngredient:
       type: object
       properties:
-        ingredient_id:
-          type: integer
-          example: 15
-        name:
-          type: string
-          example: "Picles"
-        quantity:
-          type: number
-          format: float
-          example: 4.0
-          description: "A quantidade do ingrediente na receita (ex: 2.0 para duas fatias)"
-
+        ingredient_id: {type: integer, example: 15}
+        name: {type: string, example: "Picles"}
+        quantity: {type: number, format: float, example: 4.0, description: "A quantidade do ingrediente na receita (ex: 2.0 para duas fatias)"}
     NewProductIngredient:
       type: object
-      required:
-        - ingredient_id
-        - quantity
-      properties:
-        ingredient_id:
-          type: integer
-          example: 10
-        quantity:
-          type: number
-          format: float
-          example: 2.0
-# --- Schemas para Seções do Cardápio ---
+      required: [ingredient_id, quantity]
+      properties: {ingredient_id: {type: integer, example: 10}, quantity: {type: number, format: float, example: 2.0}}
     Section:
       type: object
-      properties:
-        id:
-          type: integer
-          example: 2
-        name:
-          type: string
-          example: "Lanches"
-        display_order:
-          type: integer
-          example: 1
-          description: "A ordem em que a seção deve aparecer no cardápio (menor primeiro)."
-
-    # Schema para quando listamos as seções com seus produtos
+      properties: {id: {type: integer, example: 2}, name: {type: string, example: "Lanches"}, display_order: {type: integer, example: 1, description: "A ordem em que a seção deve aparecer no cardápio (menor primeiro)."}}
     SectionWithProducts:
       allOf:
-        - $ref: '#/components/schemas/Section'
+        - {$ref: '#/components/schemas/Section'}
         - type: object
           properties:
             products:
               type: array
-              items:
-                $ref: '#/components/schemas/Product'
-
+              items: {$ref: '#/components/schemas/Product'}
     NewSection:
       type: object
-      required:
-        - name
-      properties:
-        name:
-          type: string
-          example: "Bebidas"
-        display_order:
-          type: integer
-          example: 2
-
-# --- Schemas para Usuários (Funcionários) e Autenticação ---
+      required: [name]
+      properties: {name: {type: string, example: "Bebidas"}, display_order: {type: integer, example: 2}}
     User:
       type: object
-      properties:
-        id:
-          type: integer
-          example: 2
-        full_name:
-          type: string
-          example: "Gerente Silva"
-        email:
-          type: string
-          format: email
-          example: "gerente@royalburger.com"
-        role:
-          type: string
-          enum: [admin, manager, attendant]
-          example: "manager"
-        is_active:
-          type: boolean
-          example: true
-
+      properties: {id: {type: integer, example: 2}, full_name: {type: string, example: "Gerente Silva"}, email: {type: string, format: email, example: "gerente@royalburger.com"}, role: {type: string, enum: [admin, manager, attendant], example: "manager"}, is_active: {type: boolean, example: true}}
     NewUser:
       type: object
-      required:
-        - full_name
-        - email
-        - password
-        - role
-      properties:
-        full_name:
-          type: string
-          example: "Atendente Carlos"
-        email:
-          type: string
-          format: email
-          example: "carlos@royalburger.com"
-        password:
-          type: string
-          example: "SenhaSegura456"
-        role:
-          type: string
-          enum: [admin, manager, attendant]
-          example: "attendant"
-
+      required: [full_name, email, password, role]
+      properties: {full_name: {type: string, example: "Atendente Carlos"}, email: {type: string, format: email, example: "carlos@royalburger.com"}, password: {type: string, example: "SenhaSegura456"}, role: {type: string, enum: [admin, manager, attendant], example: "attendant"}}
     UserLogin:
       type: object
-      required:
-        - email
-        - password
-      properties:
-        email:
-          type: string
-          example: "admin@royalburger.com"
-        password:
-          type: string
-          example: "supersecret"
-
+      required: [email, password]
+      properties: {email: {type: string, example: "admin@royalburger.com"}, password: {type: string, example: "supersecret"}}
     TokenResponse:
       type: object
-      properties:
-        access_token:
-          type: string
-          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-
+      properties: {access_token: {type: string, example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}}
     PasswordResetRequest:
       type: object
-      required:
-        - email
-      properties:
-        email:
-          type: string
-          format: email
-          example: "gerente@royalburger.com"
-
+      required: [email]
+      properties: {email: {type: string, format: email, example: "gerente@royalburger.com"}}
     PasswordResetFinalize:
       type: object
-      required:
-        - token
-        - new_password
-      properties:
-        token:
-          type: string
-          example: "um_token_jwt_especial_de_reset"
-        new_password:
-          type: string
-          example: "NovaSenha@123"
-
-# ===============================================================
-# Definição de Segurança Global
-# ===============================================================
+      required: [token, new_password]
+      properties: {token: {type: string, example: "um_token_jwt_especial_de_reset"}, new_password: {type: string, example: "NovaSenha@123"}}
 security:
   - bearerAuth: []
-
-# ===============================================================
-# Paths (Endpoints da API)
-# ===============================================================
 paths:
-  # --- Rotas de Chat ---
   /chats/{order_id}:
     get:
       summary: Busca o histórico de mensagens de um pedido.
       tags: [Chat]
       parameters:
-        - {name: order_id, in: path, required: true, schema: {type: integer}}
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Histórico de mensagens retornado com sucesso.
           content:
             application/json:
-              schema: {type: array, items: {$ref: '#/components/schemas/ChatMessage'}}
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/ChatMessage'}
   /chats/{order_id}/messages:
     post:
       summary: Envia uma nova mensagem para o chat de um pedido.
       tags: [Chat]
       parameters:
-        - {name: order_id, in: path, required: true, schema: {type: integer}}
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
-          application/json: {schema: {$ref: '#/components/schemas/NewChatMessage'}}
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewChatMessage'
       responses:
         '201':
           description: Mensagem criada com sucesso.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/ChatMessage'}}
-
-  # --- Rotas de Clientes ---
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
   /customers:
     post:
       summary: Cria um novo cliente (cadastro).
@@ -512,12 +239,16 @@ paths:
       requestBody:
         required: true
         content:
-          application/json: {schema: {$ref: '#/components/schemas/NewCustomer'}}
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCustomer'
       responses:
         '201':
           description: Cliente criado com sucesso.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/Customer'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
     get:
       summary: (Admin) Lista todos os clientes.
       tags: [Clientes]
@@ -525,119 +256,190 @@ paths:
         '200':
           description: Lista de clientes.
           content:
-            application/json: {schema: {type: array, items: {$ref: '#/components/schemas/Customer'}}}
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Customer'}
   /customers/{user_id}:
     get:
       summary: Busca dados de um cliente específico.
       tags: [Clientes]
       parameters:
-        - {name: user_id, in: path, required: true, schema: {type: integer}}
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Dados do cliente.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/Customer'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
     put:
       summary: Atualiza os dados de um cliente.
+      description: |-
+        Atualiza um ou mais campos do perfil de um cliente. 
+        A API valida o formato do CPF e a unicidade do e-mail e telefone antes de salvar.
+        Um cliente só pode atualizar seus próprios dados, a menos que o solicitante seja um admin.
       tags: [Clientes]
       parameters:
-        - {name: user_id, in: path, required: true, schema: {type: integer}}
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         content:
-          application/json: {schema: {$ref: '#/components/schemas/NewCustomer'}}
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomer'
       responses:
         '200':
           description: Dados atualizados com sucesso.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/MessageResponse'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: "Requisição Inválida / Erro de Validação. Ocorre se os dados enviados são inválidos (ex: CPF incorreto, e-mail ou telefone já em uso)."
+        '403':
+          description: Acesso proibido.
+        '404':
+          description: Cliente não encontrado.
     delete:
       summary: Inativa a conta de um cliente.
       tags: [Clientes]
       parameters:
-        - {name: user_id, in: path, required: true, schema: {type: integer}}
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Conta inativada com sucesso.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/MessageResponse'}}
-
-  # --- Rotas de Endereços ---
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
   /customers/{user_id}/addresses:
     get:
       summary: Lista os endereços de um cliente.
       tags: [Endereços]
       parameters:
-        - {name: user_id, in: path, required: true, schema: {type: integer}}
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Lista de endereços.
           content:
-            application/json: {schema: {type: array, items: {$ref: '#/components/schemas/Address'}}}
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Address'}
     post:
       summary: Adiciona um novo endereço para um cliente.
       tags: [Endereços]
       parameters:
-        - {name: user_id, in: path, required: true, schema: {type: integer}}
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
-          application/json: {schema: {$ref: '#/components/schemas/NewAddress'}}
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAddress'
       responses:
         '201':
           description: Endereço criado com sucesso.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/Address'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
   /customers/addresses/{address_id}:
     put:
       summary: Atualiza um endereço específico.
       tags: [Endereços]
       parameters:
-        - {name: address_id, in: path, required: true, schema: {type: integer}}
+        - name: address_id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
-          application/json: {schema: {$ref: '#/components/schemas/NewAddress'}}
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAddress'
       responses:
         '200':
           description: Endereço atualizado.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/MessageResponse'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
     delete:
       summary: Deleta um endereço específico.
       tags: [Endereços]
       parameters:
-        - {name: address_id, in: path, required: true, schema: {type: integer}}
+        - name: address_id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Endereço deletado.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/MessageResponse'}}
-            
-  # --- Rotas de Fidelidade ---
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
   /customers/{user_id}/loyalty/balance:
     get:
       summary: Consulta o saldo de pontos de fidelidade.
+      description: Consulta o saldo de pontos do cliente. Importante - Esta rota verifica e zera o saldo se os pontos tiverem expirado por inatividade (+60 dias).
       tags: [Fidelidade]
       parameters:
-        - {name: user_id, in: path, required: true, schema: {type: integer}}
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Saldo de pontos.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/LoyaltyBalance'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoyaltyBalance'
   /customers/{user_id}/loyalty/history:
     get:
       summary: Consulta o histórico de pontos de fidelidade.
+      description: Retorna o histórico de transações de pontos, incluindo ganhos, resgates e expirações por inatividade.
       tags: [Fidelidade]
       parameters:
-        - {name: user_id, in: path, required: true, schema: {type: integer}}
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Histórico de transações de pontos.
           content:
-            application/json: {schema: {type: array, items: {$ref: '#/components/schemas/LoyaltyHistoryEntry'}}}
-
-  # --- Rotas de Ingredientes (Gerenciamento) ---
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/LoyaltyHistoryEntry'}
   /ingredients:
     get:
       summary: (Admin) Lista todos os ingredientes.
@@ -646,60 +448,87 @@ paths:
         '200':
           description: Lista de ingredientes.
           content:
-            application/json: {schema: {type: array, items: {$ref: '#/components/schemas/Ingredient'}}}
+            application/json:
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Ingredient'}
     post:
       summary: (Admin) Cria um novo ingrediente.
       tags: [Ingredientes]
       requestBody:
         required: true
         content:
-          application/json: {schema: {$ref: '#/components/schemas/NewIngredient'}}
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewIngredient'
       responses:
         '201':
           description: Ingrediente criado com sucesso.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/Ingredient'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
   /ingredients/{ingredient_id}:
     put:
       summary: (Admin) Atualiza um ingrediente.
       tags: [Ingredientes]
       parameters:
-        - {name: ingredient_id, in: path, required: true, schema: {type: integer}}
+        - name: ingredient_id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         content:
-          application/json: {schema: {$ref: '#/components/schemas/NewIngredient'}}
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewIngredient'
       responses:
         '200':
           description: Ingrediente atualizado com sucesso.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/MessageResponse'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
     delete:
       summary: (Admin) Inativa um ingrediente.
       tags: [Ingredientes]
       parameters:
-        - {name: ingredient_id, in: path, required: true, schema: {type: integer}}
+        - name: ingredient_id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Ingrediente inativado com sucesso.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/MessageResponse'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
   /ingredients/{ingredient_id}/availability:
     patch:
       summary: (Admin) Atualiza a disponibilidade de um ingrediente.
       tags: [Ingredientes]
       parameters:
-        - {name: ingredient_id, in: path, required: true, schema: {type: integer}}
+        - name: ingredient_id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
-          application/json: {schema: {$ref: '#/components/schemas/UpdateIngredientAvailability'}}
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIngredientAvailability'
       responses:
         '200':
           description: Disponibilidade atualizada com sucesso.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/MessageResponse'}}
-
-  # --- Rotas de Notificações ---
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
   /notifications:
     get:
       summary: Lista as notificações do usuário.
@@ -709,7 +538,9 @@ paths:
           description: Lista de notificações.
           content:
             application/json:
-              schema: {type: array, items: {$ref: '#/components/schemas/Notification'}}
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/Notification'}
   /notifications/read-all:
     patch:
       summary: Marca todas as notificações como lidas.
@@ -718,20 +549,26 @@ paths:
         '200':
           description: Notificações marcadas como lidas.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/MessageResponse'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
   /notifications/{notification_id}/read:
     patch:
       summary: Marca uma notificação específica como lida.
       tags: [Notificações]
       parameters:
-        - {name: notification_id, in: path, required: true, schema: {type: integer}}
+        - name: notification_id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Notificação marcada como lida.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/MessageResponse'}}
-
-  # --- Rotas de Pedidos ---
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
   /orders:
     post:
       summary: (Cliente) Cria um novo pedido.
@@ -739,7 +576,9 @@ paths:
       requestBody:
         required: true
         content:
-          application/json: {schema: {$ref: '#/components/schemas/NewOrder'}}
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewOrder'
       responses:
         '201':
           description: Pedido criado com sucesso.
@@ -759,7 +598,9 @@ paths:
           description: Histórico de pedidos.
           content:
             application/json:
-              schema: {type: array, items: {$ref: '#/components/schemas/OrderSummary'}}
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/OrderSummary'}
   /orders/all:
     get:
       summary: (Admin) Lista todos os pedidos do sistema.
@@ -769,49 +610,69 @@ paths:
           description: Lista de todos os pedidos.
           content:
             application/json:
-              schema: {type: array, items: {$ref: '#/components/schemas/OrderSummary'}}
+              schema:
+                type: array
+                items: {$ref: '#/components/schemas/OrderSummary'}
   /orders/{order_id}:
     get:
       summary: Busca os detalhes de um pedido específico.
       tags: [Pedidos]
       parameters:
-        - {name: order_id, in: path, required: true, schema: {type: integer}}
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Detalhes do pedido.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/OrderDetails'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetails'
   /orders/{order_id}/status:
     patch:
       summary: (Admin) Atualiza o status de um pedido.
       tags: [Pedidos]
       parameters:
-        - {name: order_id, in: path, required: true, schema: {type: integer}}
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
-          application/json: {schema: {$ref: '#/components/schemas/UpdateOrderStatus'}}
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderStatus'
       responses:
         '200':
           description: Status atualizado com sucesso.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/MessageResponse'}}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
   /orders/{order_id}/cancel:
     post:
       summary: (Cliente) Cancela um pedido.
       tags: [Pedidos]
       parameters:
-        - {name: order_id, in: path, required: true, schema: {type: integer}}
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Pedido cancelado com sucesso.
           content:
-            application/json: {schema: {$ref: '#/components/schemas/MessageResponse'}}
-# --- Rotas de Produtos ---
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
   /products:
     get:
       summary: Lista todos os produtos ativos (Cardápio).
-      description: Rota pública para qualquer pessoa ver o cardápio de produtos disponíveis para pedido.
       security: []
       tags: [Produtos]
       responses:
@@ -821,11 +682,9 @@ paths:
             application/json:
               schema:
                 type: array
-                items:
-                  $ref: '#/components/schemas/Product'
+                items: {$ref: '#/components/schemas/Product'}
     post:
       summary: (Admin) Cria um novo produto.
-      description: Adiciona um novo item ao cardápio. Requer cargo de Admin ou Gerente.
       tags: [Produtos]
       requestBody:
         required: true
@@ -840,13 +699,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Product'
-        '400':
-          description: Dados inválidos.
-
   /products/{product_id}:
     get:
       summary: Busca os detalhes de um produto específico.
-      description: Rota pública para ver os detalhes de um único produto, como ingredientes e descrição completa.
       security: []
       tags: [Produtos]
       parameters:
@@ -861,14 +716,9 @@ paths:
           content:
             application/json:
               schema:
-                # Aqui o ideal seria um schema 'ProductDetails' que inclui a lista de ingredientes
-                # Mas por enquanto vamos reutilizar o schema 'Product'
                 $ref: '#/components/schemas/Product'
-        '404':
-          description: Produto não encontrado.
     put:
       summary: (Admin) Atualiza um produto.
-      description: Atualiza os dados de um produto existente. Requer cargo de Admin ou Gerente.
       tags: [Produtos]
       parameters:
         - name: product_id
@@ -881,7 +731,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewProduct' # Reutilizamos o schema de criação
+              $ref: '#/components/schemas/NewProduct'
       responses:
         '200':
           description: Produto atualizado com sucesso.
@@ -889,11 +739,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
-        '404':
-          description: Produto não encontrado.
     delete:
       summary: (Admin) Inativa um produto.
-      description: Remove um produto do cardápio visível para clientes (marca como inativo). Requer cargo de Admin ou Gerente.
       tags: [Produtos]
       parameters:
         - name: product_id
@@ -908,20 +755,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
-        '404':
-          description: Produto não encontrado.
-# --- Rotas de Associação de Ingredientes a Produtos ---
   /products/{product_id}/ingredients:
     get:
       summary: Lista os ingredientes de um produto.
-      description: Retorna a lista de ingredientes e suas quantidades que compõem um produto específico.
       security: []
       tags: [Produtos]
       parameters:
         - name: product_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
         '200':
           description: Lista de ingredientes do produto.
@@ -929,19 +773,16 @@ paths:
             application/json:
               schema:
                 type: array
-                items:
-                  $ref: '#/components/schemas/ProductIngredient'
-        '404':
-          description: Produto não encontrado.
+                items: {$ref: '#/components/schemas/ProductIngredient'}
     post:
       summary: (Admin) Adiciona um ingrediente a um produto.
-      description: Associa um ingrediente existente a um produto, definindo a quantidade. Se a associação já existir, atualiza a quantidade.
       tags: [Produtos]
       parameters:
         - name: product_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -955,25 +796,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
-        '400':
-          description: Dados inválidos.
-        '500':
-          description: Falha ao associar.
-
   /products/{product_id}/ingredients/{ingredient_id}:
     delete:
       summary: (Admin) Remove um ingrediente de um produto.
-      description: Desfaz a associação entre um produto e um ingrediente.
       tags: [Produtos]
       parameters:
         - name: product_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: ingredient_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
         '200':
           description: Ingrediente desassociado com sucesso.
@@ -981,13 +818,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
-        '404':
-          description: Associação não encontrada.
-# --- Rotas de Seções do Cardápio ---
   /sections:
     get:
       summary: Lista todas as seções com seus respectivos produtos.
-      description: Rota pública principal para montar o cardápio no frontend. Retorna todas as seções ativas, ordenadas, e com a lista de produtos de cada uma.
       security: []
       tags: [Seções]
       responses:
@@ -997,11 +830,9 @@ paths:
             application/json:
               schema:
                 type: array
-                items:
-                  $ref: '#/components/schemas/SectionWithProducts'
+                items: {$ref: '#/components/schemas/SectionWithProducts'}
     post:
       summary: (Admin) Cria uma nova seção.
-      description: Adiciona uma nova categoria ao cardápio (ex Lanches, Bebidas). Requer cargo de Admin ou Gerente.
       tags: [Seções]
       requestBody:
         required: true
@@ -1016,20 +847,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Section'
-        '400':
-          description: Dados inválidos.
-
   /sections/{section_id}:
     get:
       summary: Busca uma seção específica com seus produtos.
-      description: Rota pública para ver os detalhes e produtos de uma única seção.
       security: []
       tags: [Seções]
       parameters:
         - name: section_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
         '200':
           description: Detalhes da seção.
@@ -1037,23 +865,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SectionWithProducts'
-        '404':
-          description: Seção não encontrada.
     put:
       summary: (Admin) Atualiza uma seção.
-      description: Atualiza os dados de uma seção, como seu nome ou ordem de exibição. Requer cargo de Admin ou Gerente.
       tags: [Seções]
       parameters:
         - name: section_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewSection' # Reutilizamos o schema de criação
+              $ref: '#/components/schemas/NewSection'
       responses:
         '200':
           description: Seção atualizada com sucesso.
@@ -1061,17 +887,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
-        '404':
-          description: Seção não encontrada.
     delete:
       summary: (Admin) Deleta uma seção.
-      description: Remove uma seção do cardápio. CUIDADO Esta ação pode deixar produtos sem seção. Requer cargo de Admin ou Gerente.
       tags: [Seções]
       parameters:
         - name: section_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
         '200':
           description: Seção deletada com sucesso.
@@ -1079,23 +903,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
-        '404':
-          description: Seção não encontrada.
-# --- Rota de Associação de Produtos a Seções ---
   /sections/{section_id}/products/{product_id}:
     post:
       summary: (Admin) Associa um produto a uma seção.
-      description: Define a qual seção um produto pertence. Requer cargo de Admin ou Gerente.
       tags: [Seções]
       parameters:
         - name: section_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: product_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
         '201':
           description: Associação realizada com sucesso.
@@ -1103,21 +925,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
-        '500':
-          description: Falha ao realizar associação.
     delete:
       summary: (Admin) Remove a associação de um produto a uma seção.
-      description: Deixa um produto "sem seção". Requer cargo de Admin ou Gerente.
       tags: [Seções]
       parameters:
         - name: section_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: product_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
         '200':
           description: Associação removida com sucesso.
@@ -1125,13 +946,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
-        '404':
-          description: Associação não encontrada.
-# --- Rotas de Autenticação (Funcionários) ---
   /users/login:
     post:
       summary: Autentica um funcionário.
-      description: Autentica um usuário (funcionário) e retorna um token JWT.
       security: []
       tags: [Autenticação (Funcionários)]
       requestBody:
@@ -1147,13 +964,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
-        '401':
-          description: Credenciais inválidas.
-
   /users/request-password-reset:
     post:
       summary: Inicia o processo de redefinição de senha.
-      description: O usuário informa seu e-mail e a API envia um link de redefinição.
       security: []
       tags: [Autenticação (Funcionários)]
       requestBody:
@@ -1169,11 +982,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
-
   /users/reset-password:
     post:
       summary: Finaliza a redefinição de senha.
-      description: O usuário envia o token recebido por e-mail e uma nova senha.
       security: []
       tags: [Autenticação (Funcionários)]
       requestBody:
@@ -1189,14 +1000,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
-        '400':
-          description: Token inválido/expirado ou senha fraca.
-
-  # --- Rotas de Usuários (Funcionários) ---
   /users/profile:
     get:
       summary: Busca o perfil do funcionário logado.
-      description: Retorna os dados do funcionário que está fazendo a requisição (identificado pelo token).
       tags: [Usuários (Funcionários)]
       responses:
         '200':
@@ -1205,13 +1011,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '401':
-          description: Não autorizado.
-
   /users:
     get:
       summary: (Admin) Lista todos os funcionários.
-      description: Retorna uma lista de todos os usuários que não são clientes. Requer cargo de Admin.
       tags: [Usuários (Funcionários)]
       responses:
         '200':
@@ -1222,11 +1024,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-        '403':
-          description: Acesso proibido.
     post:
       summary: (Admin) Cria um novo funcionário.
-      description: Adiciona um novo funcionário ao sistema. Requer cargo de Admin.
       tags: [Usuários (Funcionários)]
       requestBody:
         required: true
@@ -1241,9 +1040,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '409':
-          description: E-mail já em uso.
-
   /users/{user_id}:
     get:
       summary: (Admin) Busca um funcionário por ID.
@@ -1252,7 +1048,8 @@ paths:
         - name: user_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
         '200':
           description: Dados do funcionário.
@@ -1260,8 +1057,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '404':
-          description: Funcionário não encontrado.
     put:
       summary: (Admin) Atualiza um funcionário.
       tags: [Usuários (Funcionários)]
@@ -1269,12 +1064,13 @@ paths:
         - name: user_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewUser' # Reutilizamos
+              $ref: '#/components/schemas/NewUser'
       responses:
         '200':
           description: Funcionário atualizado.
@@ -1289,7 +1085,8 @@ paths:
         - name: user_id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
         '200':
           description: Funcionário inativado.

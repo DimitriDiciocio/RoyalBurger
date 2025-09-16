@@ -3,7 +3,7 @@
 from flask import Blueprint, request, jsonify
 from ..services import user_service, address_service, loyalty_service  # 1. Importa o novo serviço
 from ..services.auth_service import require_role
-from flask_jwt_extended import jwt_required, get_jwt  # Importa funções do JWT
+from flask_jwt_extended import jwt_required, get_jwt, get_jwt_identity
 
 customer_bp = Blueprint('customers', __name__)
 
@@ -13,16 +13,31 @@ customer_bp = Blueprint('customers', __name__)
 # POST /src/customers/ -> Cria um novo cliente
 @customer_bp.route('/', methods=['POST'])
 def create_customer_route():
-    # ... (código existente)
     data = request.get_json()
-    if not data or not data.get('email') or not data.get('password') or not data.get('full_name'):
-        return jsonify({"error": "Nome completo, email e senha são obrigatórios"}), 400
-    new_user = user_service.create_user(data)
+
+    # 1. Verifica se todos os campos obrigatórios foram enviados
+    required_fields = ['full_name', 'email', 'password', 'password_confirmation', 'date_of_birth']
+    if not data or not all(field in data for field in required_fields):
+        return jsonify({
+                           "error": "Todos os campos são obrigatórios: nome completo, email, senha, confirmação de senha e data de nascimento."}), 400
+
+    password = data.get('password')
+    password_confirmation = data.get('password_confirmation')
+
+    # 2. NOVA VERIFICAÇÃO: Garante que as senhas são iguais
+    if password != password_confirmation:
+        return jsonify({"error": "As senhas não conferem."}), 400
+
+    # 3. Se tudo estiver certo, chama o serviço.
+    #    Note que não passamos o 'password_confirmation' para o serviço.
+    #    Ele já cumpriu sua função.
+    new_user, error_message = user_service.create_user(data)
+
     if new_user:
         return jsonify(new_user), 201
     else:
-        return jsonify({"error": "Não foi possível criar o usuário. O e-mail já pode estar em uso."}), 409
-
+        # A mensagem de erro específica vem do serviço (ex: senha fraca, e-mail em uso)
+        return jsonify({"error": error_message}), 409
 
 # GET /src/customers/ -> Rota protegida para admins/managers verem todos os clientes
 @customer_bp.route('/', methods=['GET'])
@@ -37,10 +52,11 @@ def get_all_customers_route():
 @customer_bp.route('/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_customer_by_id_route(user_id):
-    # ... (código existente)
     claims = get_jwt()
-    if claims.get('role') != 'admin' and claims.get('id') != user_id:
+    # CORREÇÃO: Usa get_jwt_identity()
+    if 'admin' not in claims.get('roles', []) and get_jwt_identity() != str(user_id):
         return jsonify({"msg": "Acesso não autorizado"}), 403
+
     user = user_service.get_user_by_id(user_id)
     if user and user['role'] == 'customer':
         return jsonify(user), 200
@@ -51,26 +67,32 @@ def get_customer_by_id_route(user_id):
 @customer_bp.route('/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def update_customer_route(user_id):
-    # ... (código existente)
     claims = get_jwt()
-    if claims.get('id') != user_id:
-        return jsonify({"msg": "Você só pode atualizar seus próprios dados"}), 403
+    # CORREÇÃO: Usa get_jwt_identity()
+    if 'admin' not in claims.get('roles', []) and get_jwt_identity() != str(user_id):
+        return jsonify({"msg": "Acesso não autorizado"}), 403
+
     data = request.get_json()
     if not data:
         return jsonify({"error": "Corpo da requisição não pode ser vazio"}), 400
-    if user_service.update_user(user_id, data):
-        return jsonify({"msg": "Dados do cliente atualizados com sucesso"}), 200
-    return jsonify({"error": "Falha ao atualizar dados do cliente"}), 404
+
+    success, message = user_service.update_user(user_id, data)
+
+    if success:
+        return jsonify({"msg": message}), 200
+    else:
+        return jsonify({"error": message}), 400
 
 
 # DELETE /src/customers/<id> -> Rota para um cliente inativar sua conta
 @customer_bp.route('/<int:user_id>', methods=['DELETE'])
 @jwt_required()
 def delete_customer_route(user_id):
-    # ... (código existente)
     claims = get_jwt()
-    if claims.get('role') != 'admin' and claims.get('id') != user_id:
+    # CORREÇÃO: Usa get_jwt_identity()
+    if 'admin' not in claims.get('roles', []) and get_jwt_identity() != str(user_id):
         return jsonify({"msg": "Acesso não autorizado"}), 403
+
     if user_service.deactivate_user(user_id):
         return jsonify({"msg": "Cliente inativado com sucesso"}), 200
     return jsonify({"error": "Falha ao inativar cliente ou cliente não encontrado"}), 404

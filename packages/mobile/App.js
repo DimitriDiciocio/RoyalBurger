@@ -1,10 +1,15 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import ContainerBurger from "./components/ContainerBurger";
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+        <View style={[styles.flex_row, styles.gap_sm]}>
+            <ContainerBurger/>
+            <ContainerBurger/>
+            <ContainerBurger/>
+        </View>
       <StatusBar style="auto" />
     </View>
   );
@@ -13,8 +18,14 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F6F6F6',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  flex_row: {
+      flexDirection: 'row',
+  },
+  gap_sm: {
+      gap: 10,
   },
 });
